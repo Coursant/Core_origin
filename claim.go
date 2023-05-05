@@ -14,75 +14,6 @@ import (
 	"github.com/iden3/go-iden3-crypto/utils"
 )
 
-/*
-Claim structure
-
-Index:
- i_0: [ 128  bits ] claim schema
-      [ 32 bits ] option flags
-          [3] Subject:
-            000: A.1 Self
-            001: invalid
-            010: A.2.i OtherIden Index
-            011: A.2.v OtherIden Value
-            100: B.i Object Index
-            101: B.v Object Value
-          [1] Expiration: bool
-          [1] Updatable: bool
-          [3] Merklized: data is merklized root is stored in the:
-            000: none
-            001: C.i Root Index (root located in i_2)
-            010: C.v Root Value (root located in v_2)
-          [24] 0
-      [ 32 bits ] version (optional?)
-      [ 61 bits ] 0 - reserved for future use
- i_1: [ 248 bits] identity (case b) (optional)
-      [  5 bits ] 0
- i_2: [ 253 bits] 0
- i_3: [ 253 bits] 0
-Value:
- v_0: [ 64 bits ]  revocation nonce
-      [ 64 bits ]  expiration date (optional)
-      [ 125 bits] 0 - reserved
- v_1: [ 248 bits] identity (case c) (optional)
-      [  5 bits ] 0
- v_2: [ 253 bits] 0
- v_3: [ 253 bits] 0
-*/
-
-// ErrDataOverflow means that given *big.Int value does not fit in Field Q
-// e.g. greater than Q constant:
-//
-//	Q constant: 21888242871839275222246405745257275088548364400416034343698204186575808495617
-var ErrDataOverflow = errors.New("data does not fits SNARK size")
-
-// ErrIncorrectIDPosition means that passed position is not one of predefined:
-// IDPositionIndex or IDPositionValue
-var ErrIncorrectIDPosition = errors.New("incorrect ID position")
-
-// ErrIncorrectMerklizedPosition means that passed position is not one of predefined:
-// MerklizedRootPositionIndex or MerklizedRootPositionValue
-var ErrIncorrectMerklizedPosition = errors.New("incorrect Merklized position")
-
-// ErrNoID returns when ID not found in the Claim.
-var ErrNoID = errors.New("ID is not set")
-
-// ErrNoMerklizedRoot returns when Merklized Root is not found in the Claim.
-var ErrNoMerklizedRoot = errors.New("Merklized root is not set")
-
-// ErrInvalidSubjectPosition returns when subject position flags sets in invalid value.
-var ErrInvalidSubjectPosition = errors.New("invalid subject position")
-
-// ErrSlotOverflow means some ElemBytes overflows Q Field. And wraps the name
-// of overflowed slot.
-type ErrSlotOverflow struct {
-	Field SlotName
-}
-
-func (e ErrSlotOverflow) Error() string {
-	return fmt.Sprintf("Slot %v not in field (too large)", e.Field)
-}
-
 type SlotName string
 
 const (
@@ -150,10 +81,6 @@ type Claim struct {
 	value [4]ElemBytes
 }
 
-// subjectFlag for the time being describes the location of ID (in index or value
-// slots or nowhere at all).
-//
-// Values subjectFlagInvalid presents for backward compatibility and for now means nothing.
 type subjectFlag byte
 
 const (
@@ -867,4 +794,37 @@ func (c *Claim) GetMerklizedPosition() (MerklizedRootPosition, error) {
 	default:
 		return 0, ErrIncorrectMerklizedPosition
 	}
+}
+
+// ErrDataOverflow means that given *big.Int value does not fit in Field Q
+// e.g. greater than Q constant:
+//
+//	Q constant: 21888242871839275222246405745257275088548364400416034343698204186575808495617
+var ErrDataOverflow = errors.New("data does not fits SNARK size")
+
+// ErrIncorrectIDPosition means that passed position is not one of predefined:
+// IDPositionIndex or IDPositionValue
+var ErrIncorrectIDPosition = errors.New("incorrect ID position")
+
+// ErrIncorrectMerklizedPosition means that passed position is not one of predefined:
+// MerklizedRootPositionIndex or MerklizedRootPositionValue
+var ErrIncorrectMerklizedPosition = errors.New("incorrect Merklized position")
+
+// ErrNoID returns when ID not found in the Claim.
+var ErrNoID = errors.New("ID is not set")
+
+// ErrNoMerklizedRoot returns when Merklized Root is not found in the Claim.
+var ErrNoMerklizedRoot = errors.New("Merklized root is not set")
+
+// ErrInvalidSubjectPosition returns when subject position flags sets in invalid value.
+var ErrInvalidSubjectPosition = errors.New("invalid subject position")
+
+// ErrSlotOverflow means some ElemBytes overflows Q Field. And wraps the name
+// of overflowed slot.
+type ErrSlotOverflow struct {
+	Field SlotName
+}
+
+func (e ErrSlotOverflow) Error() string {
+	return fmt.Sprintf("Slot %v not in field (too large)", e.Field)
 }

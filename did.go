@@ -146,8 +146,6 @@ func FindDIDMethodByValue(_v byte) (DIDMethod, error) {
 	return "", ErrDIDMethodNotSupported
 }
 
-// DID Decentralized Identifiers (DIDs)
-// https://w3c.github.io/did-core/#did-syntax
 type DID struct {
 	ID         ID         // ID did specific id
 	Method     DIDMethod  // DIDMethod did method
